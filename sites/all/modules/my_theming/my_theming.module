@@ -1,0 +1,153 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function my_theming_menu() {
+	$items = array();
+
+    $items['my-theming'] = array(
+	    'title' 		  	=> 'Theme page',
+	    'page callback'   	=> 'theming_view',
+	    'access arguments' 	=> array('access content'),
+	  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_theme().
+ */
+
+function my_theming_theme(){
+  return array(
+    'tags' => array(
+      // 'function'  => 'my_theming_tags',
+      // 'arguments' => array('text' => NULL),
+      'template'  => 'tags',
+      'variables' => array('text' => NULL),
+       )
+    );
+}
+
+/**
+ * Function theme_list
+ */
+function theme_list() {
+$variables = array(
+  'items' => array(),
+  // Leave the title element empty to omit the ul title.
+  'title' => 'Item list:',
+  'type' => 'ul',
+  'attributes' => array(),
+);
+ 
+$variables['items'][] = t('This is a list item.');
+$variables['items'][] = array(
+  'data' => t('This is a second list item'),
+);
+$variables['items'][] = array(
+  'data' => t('This is a nested list item'),
+  'id' => 'first-nested',
+  'class' => array('parent-item'),
+  'children' => array(
+     t('This is a nested list item.'),
+     t('This is a second nested list item.'),
+     array(
+       'data' => t('This is a nested nested list item'),
+       'id' => 'first-nested-sublevel',
+       'class' => array('parent-nested-item'),
+       'children' => array(
+         t('This is a nested nested list item.'),
+         t('This is a second nested nested list item.'),
+         // And on and on and on ...
+       )
+     )
+   )
+);
+  
+  $itt = theme('item_list', $variables);
+return theme('item_list', $variables);
+}
+
+/**
+ * Function table_list
+ */
+function table_list(){
+	$header_table_edit = array(  
+	    array('data' => t('Title')),  
+	    array('data' => t('Link to edit')) 
+	  ); 
+	$query = db_select('node', 'n') 
+	    ->fields('n', array('nid', 'title')) 
+	    ->execute() 
+	    ->fetchAll();  
+	foreach ($query as $record_edit_table) { 
+	   	$rows_table_edit[] = 
+	   		array(
+	   			array(
+	   				'data' => l($record_edit_table -> title, 'node/' . $record_edit_table -> nid)
+	   				),
+	   			array(
+	   				'data' => l(t('edit node'), 'node/' . $record_edit_table -> nid . '/edit')
+	   				),
+	   		);
+	}
+	$caption_table_edit = t(''); 
+	   // тут в перемінну вміщуємо таблицю з редагуванням нод
+	$table_edit = theme('table',   
+	    array('header'  => $header_table_edit,  
+	          'rows'    => $rows_table_edit, 
+	          'caption' => $caption_table_edit
+	          ) 
+	  );  
+
+	$edit_element = array( 
+                      // заголовок списку 
+                      '#title'          => t('Table for edit node'), 
+                      // вміст fieldset-а 
+                      '#children'    =>  $table_edit, 
+                      // список нашої складної 
+                      '#collapsible' => true,   
+                      // і згорнутий 
+                      '#collapsed'  => true, 
+                      // в атрибутах вказуємо, що потрібно використовувати вказані класи
+                      '#attributes'  => array(  
+                                              'class' => array('collapsible', 'collapsed')
+                                              ), 
+                      ); 
+// вміщуємо в $fieldset_edit функцію, яка виведе нам поле
+
+	  
+	  return theme('fieldset', array('element' => $edit_element));
+}
+
+
+
+/**
+ * Function theming_view().
+ */
+
+function theming_view(){
+    $fieldset_edit = table_list();
+    $list = theme_list();
+    // Використання theme_image_style 
+    $image = theme(
+      'image_style',
+      array(
+        'path' => '/u1/best.jpg',
+        'style_name' => 'medium',
+        'alt' => 'Alternate Text',
+        'title' => 'Title Text',
+      )
+    );
+    // використання hook_theme
+    $kk = array(
+      'Lil',
+      'Hello',
+      'People'
+      );
+    $txt = theme('tags',array('text' => $kk));
+    // Вивід сторінки
+    return "$list" . "$fieldset_edit" . "$image" . "$txt";
+}
