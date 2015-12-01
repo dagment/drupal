@@ -1,1 +1,0 @@
-alert ('ha-ha-ha');

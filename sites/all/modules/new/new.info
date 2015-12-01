@@ -1,4 +1,0 @@
-name = My module
-description = Examples of using hook_menu()
-core = 7.x
-package = Custom
